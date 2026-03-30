@@ -1,0 +1,569 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #FDFAF5;
+  overflow-x: hidden;
+  color: #2C2C2C;
+  font-family: 'Courier New', monospace;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 0;
+  overflow-x: hidden;
+}
+
+h1 {
+  font-size: 12px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #9C9080;
+}
+
+#canvas-sizer {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 560px;
+  /* height driven by margin-bottom compensation on wrapper */
+}
+
+#canvas-wrapper {
+  width: 560px;
+  height: 560px;
+  flex-shrink: 0;
+  /* width/height overridden by JS zoom system to match canvas */
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1.5px solid #D4C9B0;
+  box-shadow: 0 2px 12px #C4B99A33;
+  transform-origin: top center;
+}
+
+#game-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: crosshair;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  position: sticky;
+  top: 12px;
+  z-index: 50;
+  background: rgba(253,250,245,0.92);
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #D4C9B0;
+}
+
+button {
+  background: #F0EAE0;
+  color: #5C5040;
+  border: 1.5px solid #C4B99A;
+  border-radius: 5px;
+  padding: 5px 18px;
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+button:hover { background: #E4DDD0; }
+
+/* ── Ball details panel ────────────────────────────────────────────────── */
+
+/* Normal mode: 4-per-row fixed grid, left-aligned */
+.ball-details-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 130px);
+  gap: 8px;
+  justify-content: center;
+}
+
+/* Boss mode: left col | center | right col */
+.ball-details-boss {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.boss-side {
+  display: grid;
+  grid-template-columns: repeat(2, 130px);
+  gap: 8px;
+  align-content: start;
+}
+
+.boss-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 170px;
+}
+
+.boss-center .ball-card {
+  width: 170px;
+  padding: 10px 14px;
+}
+
+.ball-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 8px 10px;
+  background: #F0EAE0;
+  border: 1.5px solid #D4C9B0;
+  border-radius: 6px;
+  width: 130px;
+  box-sizing: border-box;
+  transition: opacity 0.3s;
+}
+
+.ball-card.ghost {
+  background: transparent;
+  border-color: transparent;
+  pointer-events: none;
+}
+
+.ball-card.dead {
+  opacity: 0.35;
+}
+
+.ball-card-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ball-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid #2C2C2C;
+  flex-shrink: 0;
+}
+
+.ball-name {
+  font-size: 12px;
+  font-weight: bold;
+  color: #2C2C2C;
+  letter-spacing: 0.05em;
+}
+
+.ball-divider {
+  width: 100%;
+  height: 1px;
+  background: #D4C9B0;
+  margin: 2px 0;
+}
+
+.ball-weapon-name {
+  font-size: 10px;
+  color: #7A6A5A;
+  letter-spacing: 0.04em;
+}
+
+.ball-stat {
+  font-size: 11px;
+  color: #5C5040;
+  letter-spacing: 0.03em;
+}
+
+.ball-stat.hp-low  { color: #B03030; }
+.ball-stat.hp-mid  { color: #8A7020; }
+.ball-stat.hp-full { color: #3A7A3A; }
+.ball-stat.hp-over { color: #2E86AB; } /* overcap — blue */
+
+.hint {
+  font-size: 10px;
+  color: #B0A898;
+  letter-spacing: 0.06em;
+}
+
+/* ── Pre-game overlay ──────────────────────────────────────────────────── */
+#pregame {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(253,250,245,0.96);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.pg-box {
+  background: #F0EAE0;
+  border: 1.5px solid #D4C9B0;
+  border-radius: 10px;
+  padding: 20px 24px;
+  width: min(1060px, 98vw);
+  max-height: 94vh;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+}
+
+/* Three-column layout */
+.pg-columns {
+  display: grid;
+  grid-template-columns: 170px 1fr 160px;
+  gap: 16px;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.pg-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+.pg-col-arena {
+  overflow-y: auto;
+}
+
+.pg-col-balls {
+  overflow-y: auto;
+}
+
+.pg-col-options {
+  overflow-y: auto;
+}
+
+.pg-arena-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pg-title {
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #5C5040;
+  text-align: center;
+}
+
+.pg-section-label {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #9C9080;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pg-count { font-size: 10px; color: #3A7A3A; }
+.pg-count.invalid { color: #B03030; }
+
+/* pg-arena-row is now pg-arena-list — vertical column in left pane */
+
+.pg-arena-btn {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 8px 10px;
+  background: #FDFAF5;
+  border: 1.5px solid #D4C9B0;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 11px;
+  text-align: left;
+  font-weight: bold;
+  color: #5C5040;
+  cursor: pointer;
+  transition: background 0.1s, border-color 0.1s;
+}
+.pg-arena-btn:hover { background: #F0EAE0; }
+.pg-arena-btn.active {
+  background: #E0D8C8;
+  border-color: #9C9080;
+  color: #2C2C2C;
+}
+.pg-arena-name {
+  font-weight: bold;
+  font-size: 11px;
+  color: #3A2E22;
+}
+
+.pg-arena-sub {
+  font-size: 9px;
+  font-weight: normal;
+  color: #9C9080;
+}
+
+.pg-ball-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.pg-ball-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 8px;
+  background: #FDFAF5;
+  border: 1.5px solid #D4C9B0;
+  border-radius: 6px;
+  opacity: 0.5;
+  transition: opacity 0.15s, border-color 0.15s;
+}
+.pg-ball-card.selected {
+  opacity: 1;
+  border-color: #9C9080;
+}
+
+.pg-ball-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid #2C2C2C;
+  display: block;
+}
+
+.pg-ball-name {
+  font-size: 10px;
+  font-weight: bold;
+  color: #2C2C2C;
+  letter-spacing: 0.05em;
+}
+
+.pg-ball-counter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pg-cnt-btn {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  background: #F0EAE0;
+  border: 1.5px solid #C4B99A;
+  border-radius: 4px;
+  cursor: pointer;
+  line-height: 1;
+  color: #5C5040;
+}
+.pg-cnt-btn:hover { background: #E4DDD0; }
+
+.pg-cnt-val {
+  font-size: 12px;
+  font-weight: bold;
+  color: #2C2C2C;
+  min-width: 14px;
+  text-align: center;
+}
+
+.pg-start {
+  width: 100%;
+  padding: 10px 16px;
+  background: #5C5040;
+  color: #FDFAF5;
+  border: none;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  transition: background 0.12s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.pg-start .pg-count { color: #D4C9B0; }
+.pg-start .pg-count.invalid { color: #E08080; }
+.pg-start:hover { background: #3C3028; }
+.pg-start.disabled { background: #C4B99A; cursor: not-allowed; }
+
+.pg-timer-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pg-timer-btn {
+  flex: 1;
+  min-width: 52px;
+  padding: 6px 8px;
+  background: #FDFAF5;
+  border: 1.5px solid #D4C9B0;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: bold;
+  color: #5C5040;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.pg-timer-btn:hover  { background: #F0EAE0; }
+.pg-timer-btn.active { background: #E0D8C8; border-color: #9C9080; color: #2C2C2C; }
+
+/* ── Team selector in pre-game ─────────────────────────────────────────── */
+.pg-ball-card-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pg-team-row {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.pg-team-btn {
+  width: 20px;
+  height: 16px;
+  padding: 0;
+  font-family: inherit;
+  font-size: 8px;
+  font-weight: bold;
+  border: 1px solid #C4B99A;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.pg-team-btn.active {
+  border-color: #2C2C2C;
+}
+
+.pg-instances {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 3px;
+  border-top: 1px solid #D4C9B0;
+  padding-top: 3px;
+}
+
+.pg-instance-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.pg-instance-label {
+  font-size: 8px;
+  color: #9C9080;
+  min-width: 14px;
+  font-family: inherit;
+}
+
+.pg-boss-btn {
+  width: 22px;
+  height: 16px;
+  padding: 0;
+  font-size: 10px;
+  background: #F0EAE0;
+  border: 1px solid #C4B99A;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.pg-boss-btn.active {
+  background: #FFD700;
+  border-color: #A08000;
+}
+.ball-stat.hp-boss { color: #A08000; font-weight: bold; }
+
+.pg-options-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+.pg-toggle-btn {
+  padding: 5px 16px;
+  font-size: 12px;
+  background: #E8DDD0;
+  border: 1.5px solid #C4B99A;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #5A4A3A;
+  transition: background 0.1s;
+}
+.pg-toggle-btn.active {
+  background: #5CB85C;
+  color: white;
+  border-color: #3A8A3A;
+}
+
+/* Custom scrollbar for pre-game columns */
+.pg-col-arena::-webkit-scrollbar,
+.pg-col-balls::-webkit-scrollbar,
+.pg-col-options::-webkit-scrollbar { width: 4px; }
+.pg-col-arena::-webkit-scrollbar-track,
+.pg-col-balls::-webkit-scrollbar-track,
+.pg-col-options::-webkit-scrollbar-track { background: #E8DDD0; border-radius: 2px; }
+.pg-col-arena::-webkit-scrollbar-thumb,
+.pg-col-balls::-webkit-scrollbar-thumb,
+.pg-col-options::-webkit-scrollbar-thumb { background: #C4B99A; border-radius: 2px; }
+.pg-col-arena::-webkit-scrollbar-thumb:hover,
+.pg-col-balls::-webkit-scrollbar-thumb:hover,
+.pg-col-options::-webkit-scrollbar-thumb:hover { background: #9C9080; }
+
+/* ── Zoom controls ─────────────────────────────────────────────────────────── */
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.zoom-controls button {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+#zoom-label {
+  font-size: 10px;
+  font-family: monospace;
+  color: #5C5040;
+  min-width: 32px;
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+
+
+/* Boss button — monospace to match rest of UI */
+.pg-boss-btn {
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 9px;
+  letter-spacing: 0;
+}

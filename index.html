@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ball Arena</title>
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <h1>Ball Arena</h1>
+  <div id="game-timer" style="font-size:11px;font-family:monospace;letter-spacing:0.1em;color:#9C9080;min-height:14px;"></div>
+
+  <!-- Pre-game overlay -->
+  <div id="pregame"></div>
+
+  <div id="canvas-sizer">
+    <div id="canvas-wrapper">
+      <canvas id="game-canvas"></canvas>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="btn-reset">↺ Reset</button>
+    <div class="zoom-controls">
+      <button id="btn-zoom-out">−</button>
+      <span id="zoom-label">100%</span>
+      <button id="btn-zoom-in">+</button>
+    </div>
+  </div>
+
+  <div id="ball-details" class="ball-details-grid"></div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
