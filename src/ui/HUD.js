@@ -151,6 +151,7 @@ export class HUD {
         case 'BlackholeWeapon': extraEl.textContent = w._parryCooldown > 0 ? `Parry: ${w._parryCooldown.toFixed(1)}s` : `Next: ${w._fireTimer.toFixed(1)}s`; break;
         case 'HostessWeapon': { const live = w.minionSystem?.countFor(ball.id) ?? 0; extraEl.textContent = live > 0 ? `Minis: ${live} | Dur: ${w.currentLifetime.toFixed(1)}s` : `Summon in: ${w._cooldown > 0 ? w._cooldown.toFixed(1)+'s' : 'ready'}`; break; }
         case 'MenderWeapon':  extraEl.textContent = w._pulsing ? `Healing! Left: ${w._activeCharges}` : `Base: ${w.baseCharges} | CD: ${w._pulseTimer.toFixed(1)}s`; break;
+        case 'LaserWeapon':   extraEl.textContent = w._parryCooldown > 0 ? `Parry: ${w._parryCooldown.toFixed(1)}s` : w._channeling ? `Channeling! ${w._channelTimer.toFixed(1)}s` : `Next: ${w._fireTimer.toFixed(1)}s`; break;
         case 'DummyWeapon':    extraEl.textContent = '— testing dummy'; break;
         case 'GuardWeapon':    extraEl.textContent = `Hits: ${w.hitsLanded}`; break;
         case 'SwordWeapon':    extraEl.textContent = `Spin+: ${Math.min(w.hitsLanded, 20).toFixed(0)}%`; break;

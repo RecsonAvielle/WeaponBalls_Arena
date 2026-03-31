@@ -26,10 +26,11 @@ import { BlackholeSystem }        from './systems/BlackholeSystem.js';
 import { MinionSystem }           from './systems/MinionSystem.js';
 import { MenderSystem }           from './systems/MenderSystem.js';
 import { AudioSystem }            from './systems/AudioSystem.js';
+import { LaserSystem }            from './systems/LaserSystem.js';
 
 import { SwordWeapon }            from './weapons/SwordWeapon.js';
 import { DaggerWeapon }           from './weapons/DaggerWeapon.js';
-import { SiphonWeapon }            from './weapons/SiphonWeapon.js';
+import { SiphonWeapon }           from './weapons/SiphonWeapon.js';
 import { ChanceWeapon }           from './weapons/ChanceWeapon.js';
 import { FrostWeapon }            from './weapons/FrostWeapon.js';
 import { RushWeapon }             from './weapons/RushWeapon.js';
@@ -48,6 +49,7 @@ import { SnipeWeapon }            from './weapons/SnipeWeapon.js';
 import { BlackholeWeapon }        from './weapons/BlackholeWeapon.js';
 import { HostessWeapon }          from './weapons/HostessWeapon.js';
 import { MenderWeapon }           from './weapons/MenderWeapon.js';
+import { LaserWeapon }            from './weapons/LaserWeapon.js';
 
 import { BlightWeaponless }       from './weapons/BlightWeaponless.js';
 import { BlightMelee }            from './weapons/BlightMelee.js';
@@ -177,6 +179,7 @@ const BALL_CONFIGS = [
   { id: 'blackhole', color: '#4A0E8F', name: 'Blackhole', spinSpeed:  0,    maxSpeed: 700, gravityScale: 1.0,  weapon: () => new BlackholeWeapon(bhSys)   },
   { id: 'hostess',   color: '#FF6B9D', name: 'Hostess',   spinSpeed:  0,    maxSpeed: 900, gravityScale: 0.3,  weapon: () => new HostessWeapon(minionSys) },
   { id: 'mender',   color: '#4CAF50', name: 'Mender',   spinSpeed: 0,       maxSpeed: 700, gravityScale: 1.0, weapon: () => new MenderWeapon(menderSys) },
+  { id: 'laser', color: '#FF3D00', name: 'Laser',     spinSpeed: 0,         maxSpeed: 700, gravityScale: 1.0, weapon: () => new LaserWeapon(laserSys) },
 ];
 
 // ── System instances ──────────────────────────────────────────────────────────
@@ -192,6 +195,7 @@ const shockSys    = new ShockSystem();
 const frostAreaSys = new FrostAreaSystem();
 const audio        = new AudioSystem();
 const bhSys     = new BlackholeSystem();
+const laserSys = new LaserSystem();
 const minionSys = new MinionSystem();
 const menderSys = new MenderSystem();
 const waveSys   = new WaveSystem();
@@ -216,6 +220,8 @@ function spawnBalls(ballSelections, arenaConfig, healBoxes = true) {
   shockSys.clear();
   frostAreaSys.clear();
   bhSys.clear();
+  laserSys.clear();
+  laserSys.setArena(arenaConfig.arena);
   minionSys.clear();
   menderSys.clear();
   waveSys.reset();
@@ -456,8 +462,11 @@ function update(dt) {
     waveSys.update(dt, alive.filter(b => b.isBlight));
   }  for (const ball of balls) {
     const wname = ball.weapon?.constructor.name;
-    if (wname === 'ArcherWeapon' || wname === 'SnipeWeapon' || wname === 'BlackholeWeapon') {
+    if (wname === 'ArcherWeapon' || wname === 'SnipeWeapon' || wname === 'BlackholeWeapon' || wname === 'LaserWeapon') {
       ball.weapon.targetBalls = alive.filter(b => b !== ball && (ball.team === 0 || b.team !== ball.team));
+    }
+    if (wname === 'LaserWeapon') {
+      ball._obstacleSystem = obsSystem;
     }
   }
 
@@ -484,7 +493,7 @@ function update(dt) {
   shockSys.update(dt, alive);
   frostAreaSys.update(dt, alive);
   bhSys.update(dt, alive, currentArena.arena, obsSystem);
-  // Apply blackhole teleports after all physics so velocity is preserved correctly
+  laserSys.update(dt);
   for (const { ball, x, y } of bhSys.pendingTeleports) {
     if (ball.alive) ball.position = new Vector2(x, y);
   }
@@ -498,8 +507,8 @@ function render(alpha) {
   renderer.render(
     balls, effects.pops, spikes.spikes,
     projSys.projectiles, obsSystem.obstacles, trails,
-    healBoxSys.boxes, shockSys.rings, bhSys, minionSys.minions, frostAreaSys.areas, alpha,
-    currentArena.arena, currentArena.isWaveArena ? currentArena : null,
+    healBoxSys.boxes, shockSys.rings, bhSys, minionSys.minions, frostAreaSys.areas, laserSys.beams, 
+    alpha, currentArena.arena, currentArena.isWaveArena ? currentArena : null,
   );
   const maxFreeze = Math.max(...balls.map(b => b.frozenTimer));
   if (maxFreeze > 0) renderer.drawCountdown(maxFreeze);
