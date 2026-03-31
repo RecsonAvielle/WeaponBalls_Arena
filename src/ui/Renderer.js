@@ -211,17 +211,20 @@ export class Renderer {
     ctx.rotate(angle);
     ctx.globalAlpha = fadeFrac;
 
+    const h = 6 * (beam.scale ?? 1);
+    const halfH = h / 2;
+
     if (isFlash) {
       // White → ball color blend using two overlapping rects
       ctx.fillStyle   = beam.color;
-      ctx.fillRect(-len / 2, -3, len, 6);
+      ctx.fillRect(-len / 2, -halfH, len, h);
       ctx.globalAlpha = fadeFrac * (1 - flashFrac); // white overlay fades out
       ctx.fillStyle   = '#FFFFFF';
-      ctx.fillRect(-len / 2, -3, len, 6);
+      ctx.fillRect(-len / 2, -halfH, len, h);
     } else {
       // Solid ball color, fading
       ctx.fillStyle = beam.color;
-      ctx.fillRect(-len / 2, -3, len, 6);
+      ctx.fillRect(-len / 2, -halfH, len, h);
     }
 
     ctx.restore();
@@ -499,18 +502,20 @@ export class Renderer {
     }
     
     if (ball.weapon?.menderSystem?.isActive?.(ball.id)) {
+      const ms = ball.weapon.scale ?? 1;
+      const sr = 100 * ms; // Base radius 100
       ctx.save();
       ctx.globalAlpha = 0.18;
       ctx.fillStyle   = '#4CAF50';
       ctx.beginPath();
-      ctx.arc(x, y, 80, 0, Math.PI * 2);
+      ctx.arc(x, y, sr, 0, Math.PI * 2);
       ctx.fill();
       ctx.globalAlpha = 0.55;
       ctx.strokeStyle = '#4CAF50';
       ctx.lineWidth   = 1.5;
       ctx.setLineDash([6, 4]);
       ctx.beginPath();
-      ctx.arc(x, y, 80, 0, Math.PI * 2);
+      ctx.arc(x, y, sr, 0, Math.PI * 2);
       ctx.stroke();
       ctx.setLineDash([]);
       ctx.restore();

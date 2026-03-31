@@ -47,7 +47,8 @@ export class MenderSystem {
 
         const dx = ball.position.x - fx;
         const dy = ball.position.y - fy;
-        if (Math.sqrt(dx * dx + dy * dy) > MENDER_RADIUS + ball.radius) continue;
+        const scale = field.ownerWeapon.scale ?? 1;
+        if (Math.sqrt(dx * dx + dy * dy) > MENDER_RADIUS * scale + ball.radius) continue;
 
         ball.heal(1);
         field.ownerWeapon.healCharges--;

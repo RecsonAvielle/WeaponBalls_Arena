@@ -164,16 +164,16 @@ export class GameManager {
         maxSpeed     : cfg.maxSpeed,
       });
 
+      ball.enableTrail      = cfg.trail ?? false;
+      ball.weapon           = cfg.weapon();
+      ball.weapon.owner     = ball;
+      ball._configId        = cfg.id;
+
       if (isBoss) {
         this.bossSys.setupBoss(ball, cfg);
       } else if (arenaConfig.isBossArena) {
         this.bossSys.setupChallenger(ball);
       }
-
-      ball.enableTrail      = cfg.trail ?? false;
-      ball.weapon           = cfg.weapon();
-      ball.weapon.owner     = ball;
-      ball._configId        = cfg.id;
 
       if (cfg.id === 'spike') this.spikeBallRef = ball;
       return ball;
