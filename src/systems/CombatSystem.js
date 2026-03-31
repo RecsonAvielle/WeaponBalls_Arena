@@ -71,7 +71,7 @@ export class CombatSystem {
   }
 
   _checkSiphonAllyHeal(attacker, target) {
-    if (!attacker.weapon.isReady || !target.alive) return;
+    if (!attacker.weapon.isReadyFor(target.id) || !target.alive) return;
     if (attacker.team === 0 || attacker.team !== target.team) return;
 
     // Weapon segment contact — same logic as _checkWeaponHit
@@ -84,7 +84,9 @@ export class CombatSystem {
     const { dist } = segmentToPointDistance(seg.start, seg.end, target.position);
     if (dist >= target.radius) return;
 
+    attacker.weapon._currentTargetId = target.id;
     attacker.weapon.onCollide(attacker, target);
+    attacker.weapon._currentTargetId = null;
   }
 
   _checkBodyHit(attacker, target) {
@@ -97,7 +99,7 @@ export class CombatSystem {
   }
 
   _checkWeaponHit(attacker, target) {
-    if (!attacker.weapon.isReady || !target.alive || target.isImmune) return;
+    if (!attacker.weapon.isReadyFor(target.id) || !target.alive || target.isImmune) return;
 
     const weaponDir = new Vector2(Math.cos(attacker.spinAngle), Math.sin(attacker.spinAngle));
     const toTarget  = target.position.sub(attacker.position).normalized;
@@ -108,7 +110,9 @@ export class CombatSystem {
     const { dist } = segmentToPointDistance(seg.start, seg.end, target.position);
     if (dist >= target.radius) return;
 
+    attacker.weapon._currentTargetId = target.id;
     attacker.weapon.onCollide(attacker, target);
+    attacker.weapon._currentTargetId = null;
   }
 
   _checkParry(a, b) {

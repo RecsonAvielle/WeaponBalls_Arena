@@ -146,7 +146,7 @@ export class HUD {
         case 'ZipWeapon':      extraEl.textContent = w._isDashing ? `Dashing!` : `Trail: ${w.trailDuration.toFixed(1)}s`; break;
         case 'SurgeWeapon':    extraEl.textContent = w.isBoosting ? `SURGE ${w._boostTimer.toFixed(1)}s | DMG: ${w.currentDamage}` : `Surge DMG: ${w.baseDamage + w.surgeDamageBonus} | Dur: ${w.nextBoostDuration.toFixed(1)}s`; break;
         case 'ShieldWeapon':   extraEl.textContent = `Width: ×${w.widthMult.toFixed(1)} (${w.hitsLanded} parries)`; break;
-        case 'ShockWeapon':    extraEl.textContent = `AOE: ${Math.round(w.mainAoeRadius)}/${Math.round(w.chainAoeRadius)}px`; break;
+        case 'ShockWeapon':    extraEl.textContent = `AOE: ${Math.round(w.mainAoeRadius * (w.scale ?? 1))}/${Math.round(w.chainAoeRadius * (w.scale ?? 1))}px`; break;
         case 'SnipeWeapon':    extraEl.textContent = w._parryCooldown > 0 ? `Parry: ${w._parryCooldown.toFixed(1)}s` : `Next: ${w._fireTimer.toFixed(1)}s`; break;
         case 'BlackholeWeapon': extraEl.textContent = w._parryCooldown > 0 ? `Parry: ${w._parryCooldown.toFixed(1)}s` : `Next: ${w._fireTimer.toFixed(1)}s`; break;
         case 'HostessWeapon': { const live = w.minionSystem?.countFor(ball.id) ?? 0; extraEl.textContent = live > 0 ? `Minis: ${live} | Dur: ${w.currentLifetime.toFixed(1)}s` : `Summon in: ${w._cooldown > 0 ? w._cooldown.toFixed(1)+'s' : 'ready'}`; break; }

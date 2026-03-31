@@ -52,6 +52,7 @@ export class LaserSystem {
       x2: endX,   y2: endY,
       color: owner.color,
       t: 0.45, maxT: 0.45,
+      scale: ownerWeapon.scale ?? 1,
     });
   }
 

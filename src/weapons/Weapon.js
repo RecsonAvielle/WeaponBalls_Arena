@@ -21,6 +21,10 @@ export class Weapon {
     this._targetCooldowns = new Map(); // per-target hit cooldown for melee
     this.owner       = null;
     this.baseDamage  = 2; // default; overridden by subclasses
+    
+    // Interface properties for GameManager to resolve automatically
+    this.requiresTargeting = false; 
+    this.requiresObstacles = false;
   }
 
   get scaledReach()       { return this.reach       * this.scale; }

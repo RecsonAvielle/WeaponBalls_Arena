@@ -114,3 +114,13 @@ export function segmentDistance(a1, a2, b1, b2) {
 }
 
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+export function resolveAllCollisions(alive, passes = 5) {
+  for (let pass = 0; pass < passes; pass++) {
+    for (let i = 0; i < alive.length; i++) {
+      for (let j = i + 1; j < alive.length; j++) {
+        resolveCircleCollision(alive[i], alive[j]);
+      }
+    }
+  }
+}
