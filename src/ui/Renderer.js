@@ -28,7 +28,7 @@ export class Renderer {
   get height()  { return CANVAS_H; }
   get isReady() { return true; }
 
-  render(balls, deathPops, spikes, projectiles, obstacles, trails, healBoxes, shockRings, bhData, minions, frostAreas, alpha, arena, extraData = null) {
+  render(balls, deathPops, spikes, projectiles, obstacles, trails, healBoxes, shockRings, bhData, minions, frostAreas, laserBeams, alpha, arena, extraData = null) {
     const { ctx } = this;
     ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
 
@@ -67,6 +67,7 @@ export class Renderer {
     for (const ring   of shockRings)      this._drawShockRing(ring);
     for (const fa     of frostAreas)      this._drawFrostArea(fa);
     for (const ch     of bhData.channels) this._drawBHChannel(ch);
+    for (const beam of laserBeams)        this._drawLaserBeam(beam);
     for (const trail  of trails.trails)   this._drawTrail(trail);
     for (const circle of trails.circles)  this._drawCircle(circle);
     for (const spike  of spikes)          this._drawSpike(spike);
@@ -183,6 +184,46 @@ export class Renderer {
     ctx.lineWidth   = 1;
     ctx.fillRect(-len / 2, -h / 2, len, h);
     ctx.strokeRect(-len / 2, -h / 2, len, h);
+    ctx.restore();
+    ctx.globalAlpha = 1;
+  }
+
+  _drawLaserBeam(beam) {
+    const { ctx } = this;
+    const life  = beam.t / beam.maxT;       // 1.0 = just fired, 0.0 = expired
+    const age   = 1 - life;                 // 0.0 = just fired, 1.0 = expired
+
+    // Phase 1 (first 25% of lifetime): white flash fading to ball color
+    // Phase 2 (remaining 75%): ball color fading to transparent
+    const isFlash   = age < 0.25;
+    const flashFrac = age / 0.25;           // 0→1 during flash phase
+    const fadeFrac  = isFlash ? 1.0 : life / 0.75; // sustain then fade
+
+    const dx    = beam.x2 - beam.x1;
+    const dy    = beam.y2 - beam.y1;
+    const len   = Math.sqrt(dx * dx + dy * dy);
+    const angle = Math.atan2(dy, dx);
+    const cx    = (beam.x1 + beam.x2) / 2;
+    const cy    = (beam.y1 + beam.y2) / 2;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(angle);
+    ctx.globalAlpha = fadeFrac;
+
+    if (isFlash) {
+      // White → ball color blend using two overlapping rects
+      ctx.fillStyle   = beam.color;
+      ctx.fillRect(-len / 2, -3, len, 6);
+      ctx.globalAlpha = fadeFrac * (1 - flashFrac); // white overlay fades out
+      ctx.fillStyle   = '#FFFFFF';
+      ctx.fillRect(-len / 2, -3, len, 6);
+    } else {
+      // Solid ball color, fading
+      ctx.fillStyle = beam.color;
+      ctx.fillRect(-len / 2, -3, len, 6);
+    }
+
     ctx.restore();
     ctx.globalAlpha = 1;
   }
