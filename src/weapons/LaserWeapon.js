@@ -26,6 +26,8 @@ export class LaserWeapon extends Weapon {
     this._channelTimer  = 0;
     this._parryCooldown = 0;
     this.targetBalls    = [];
+    this.requiresTargeting = true;
+    this.requiresObstacles = true;
   }
 
   onTick(dt, owner) {

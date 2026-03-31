@@ -31,6 +31,7 @@ export class SnipeWeapon extends Weapon {
     this._fireTimer      = FIRE_INTERVAL;
     this._parryCooldown  = 0;
     this.targetBalls     = [];
+    this.requiresTargeting = true;
   }
 
   onProjectileHit() {

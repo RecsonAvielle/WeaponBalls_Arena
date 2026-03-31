@@ -39,6 +39,7 @@ export class ArcherWeapon extends Weapon {
     this._aimAngle      = 0;
     this.targetBalls    = [];
     this._parryCooldown = 0; // seconds remaining before parry is available again
+    this.requiresTargeting = true;
   }
 
   /**
