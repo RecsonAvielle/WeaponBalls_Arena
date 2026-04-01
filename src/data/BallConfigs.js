@@ -20,9 +20,10 @@ import { BlackholeWeapon }        from '../weapons/BlackholeWeapon.js';
 import { HostessWeapon }          from '../weapons/HostessWeapon.js';
 import { MenderWeapon }           from '../weapons/MenderWeapon.js';
 import { LaserWeapon }            from '../weapons/LaserWeapon.js';
+import { TurretWeapon }           from '../weapons/TurretWeapon.js';
 
 export function getBallConfigs(systems) {
-  const { frostAreaSys, spikes, projSys, trails, shockSys, bhSys, minionSys, menderSys, laserSys } = systems;
+  const { frostAreaSys, spikes, projSys, trails, shockSys, bhSys, minionSys, menderSys, laserSys, turretSys } = systems;
   
   return [
     { id: 'sword',   color: '#E63946', name: 'Sword',   spinSpeed:  6.2,  maxSpeed: 700, gravityScale: 1.0,  weapon: () => new SwordWeapon()            },
@@ -45,7 +46,8 @@ export function getBallConfigs(systems) {
     { id: 'snipe',     color: '#1B4332', name: 'Snipe',     spinSpeed:  0,    maxSpeed: 700, gravityScale: 1.0,  weapon: () => new SnipeWeapon(projSys)     },
     { id: 'blackhole', color: '#4A0E8F', name: 'Blackhole', spinSpeed:  0,    maxSpeed: 700, gravityScale: 1.0,  weapon: () => new BlackholeWeapon(bhSys)   },
     { id: 'hostess',   color: '#FF6B9D', name: 'Hostess',   spinSpeed:  0,    maxSpeed: 900, gravityScale: 0.3,  weapon: () => new HostessWeapon(minionSys) },
-    { id: 'mender',   color: '#4CAF50', name: 'Mender',   spinSpeed: 0,       maxSpeed: 700, gravityScale: 1.0, weapon: () => new MenderWeapon(menderSys) },
-    { id: 'laser', color: '#FF3D00', name: 'Laser',     spinSpeed: 0,         maxSpeed: 700, gravityScale: 1.0, weapon: () => new LaserWeapon(laserSys) },
+    { id: 'turret',    color: '#4682B4', name: 'Turret',    spinSpeed:  5.0,  maxSpeed: 700, gravityScale: 1.0,  weapon: () => new TurretWeapon(turretSys)  },
+    { id: 'mender',    color: '#4CAF50', name: 'Mender',    spinSpeed: 0,     maxSpeed: 700, gravityScale: 1.0,  weapon: () => new MenderWeapon(menderSys)  },
+    { id: 'laser',     color: '#FF3D00', name: 'Laser',     spinSpeed: 0,     maxSpeed: 700, gravityScale: 1.0,  weapon: () => new LaserWeapon(laserSys)    },
   ];
 }

@@ -8,8 +8,7 @@
  * Max 8 minis at once.
  */
 import { Weapon } from './Weapon.js';
-
-const BASE_LIFETIME     = 5.0;
+const BASE_LIFETIME     = 10.0;
 const BASE_COUNT        = 2;
 const MAX_MINIONS       = 16;
 const SUMMON_COOLDOWN   = 4.0; // flat 4s after last mini expires
@@ -41,9 +40,9 @@ export class HostessWeapon extends Weapon {
   }
 
   // Knockback minis receive — reduces by 1 every 2 mini hits, min 0
-  get miniKnockback() { return Math.max(0, 600 - Math.floor(this._miniHitTotal)); }
+  get miniKnockback() { return Math.max(0, 200 - Math.floor(this._miniHitTotal)); }
 
-  get currentLifetime() { return BASE_LIFETIME + this.totalDamage * 0.1; }
+  get currentLifetime() { return BASE_LIFETIME; }
   get summonCount() {
     // To get nth mini: need 30 + (n-3)*15 hits SINCE the last unlock
     // Track via _miniUnlockDamage watermarks stored separately
@@ -97,4 +96,13 @@ export class HostessWeapon extends Weapon {
 
   render() {}
   getWorldSegment() { return null; }
+
+  resetScaling() {
+    super.resetScaling();
+    this.totalDamage = 0;
+    this._extraMinis = 0;
+    this._hitsTowardNext = 0;
+    this._nextMiniThreshold = 10;
+    this._miniHitTotal = 0;
+  }
 }

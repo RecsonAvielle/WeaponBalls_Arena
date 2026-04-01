@@ -23,8 +23,8 @@ const pregameUI = new PreGameUI(
   pregameEl,
   gameManager.ballConfigs,
   ARENA_CONFIGS,
-  ({ ballSelections, arenaConfig, healBoxes = true }) => {
-    gameManager.spawnBalls(ballSelections, arenaConfig, healBoxes);
+  (options) => {
+    gameManager.spawnBalls(options.ballSelections, options.arenaConfig, options.healBoxes, options.testTools, options.scaleReset);
   },
 );
 pregameUI.show();

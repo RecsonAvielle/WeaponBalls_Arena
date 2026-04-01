@@ -19,7 +19,7 @@ import { Vector2 }    from '../core/Vector2.js';
 
 const PROJECTILE_SPEED = 640;
 const BURST_INTERVAL   = 1.5;
-const SHOT_DELAY       = 0.15;
+const SHOT_DELAY       = 0.125;
 const AIM_SMOOTHING    = 5.0; // slower rotation — enemies have more time to approach   // rad/s turn speed
 const ARROW_DAMAGE     = 2;
 
@@ -32,7 +32,7 @@ export class ArcherWeapon extends Weapon {
     super({ name: 'Bow', cooldown: 0, color: '#D4A017', reach: WEAPON_REACH, weaponWidth: WEAPON_THICK });
     this.projSystem     = projSystem;
     this.baseDamage     = ARROW_DAMAGE;
-    this.shotCount      = 1;
+    this.shotCount      = 2;
     this._shotsLeft     = 0;
     this._shotTimer     = 0;
     this._intervalTimer = 0;
@@ -168,5 +168,10 @@ export class ArcherWeapon extends Weapon {
     ctx.stroke();
 
     ctx.restore();
+  }
+
+  resetScaling() {
+    super.resetScaling();
+    this.shotCount = 2;
   }
 }

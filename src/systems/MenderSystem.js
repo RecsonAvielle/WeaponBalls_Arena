@@ -11,7 +11,7 @@
  */
 
 export const HEAL_INTERVAL = 0.3;
-export const MENDER_RADIUS = 100;
+export const MENDER_RADIUS = 200;
 
 export class MenderSystem {
   constructor() {

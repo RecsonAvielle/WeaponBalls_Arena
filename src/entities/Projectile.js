@@ -10,7 +10,7 @@ import { Vector2 } from '../core/Vector2.js';
 
 export class Projectile {
   constructor({ x, y, angle, speed, damage, ownerId, ownerTeam = 0, color,
-                radius = 5, lifetime = 2.5, projWidth = 26, projHeight = 7 }) {
+                radius = 5, lifetime = 2.5, projWidth = 26, projHeight = 7, isCircle = false }) {
     this.position   = new Vector2(x, y);
     this.velocity   = new Vector2(Math.cos(angle) * speed, Math.sin(angle) * speed);
     this.damage     = damage;
@@ -22,6 +22,7 @@ export class Projectile {
     this.alive      = true;
     this.projWidth  = projWidth;
     this.projHeight = projHeight;
+    this.isCircle   = isCircle;
   }
 
   update(dt) {

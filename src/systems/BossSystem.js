@@ -12,8 +12,8 @@ export class BossSystem {
   }
 
   setupChallenger(ball) {
-    ball.maxHp = 750;
-    ball.hp = 750;
+    ball.maxHp = 800;
+    ball.hp = 800;
   }
 
   update(dt, alive, currentArena) {

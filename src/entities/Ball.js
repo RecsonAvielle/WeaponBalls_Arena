@@ -53,6 +53,7 @@ export class Ball {
     this.hitFlash        = 0;
 
     this._menderPenalty  = false; // set true by MenderWeapon — +1 damage received
+    this._overhealDepletionTimer = 0;
 
     this.enableTrail = false;
     this.trail       = [];
@@ -97,6 +98,8 @@ export class Ball {
         this.velocity = this.velocity.add(new Vector2(0, -burst * 0.4));
       }
     }
+
+    this.weapon?.onDamaged?.();
 
     bus.emit(EVENTS.BALL_DAMAGED, { ball: this, amount, source });
     if (this.hp === 0) {
@@ -161,6 +164,16 @@ export class Ball {
     if (this._areaFrost) effectiveSpin *= 0.75;
     this.spinAngle += effectiveSpin * dt;
     if (this.hitFlash > 0) this.hitFlash--;
+    
+    // Global overheal penalty
+    if (this.hp > this.maxHp * 1.5) {
+        this._overhealDepletionTimer += dt;
+        if (this._overhealDepletionTimer >= 0.6) {
+            this.hp -= 1;
+            this._overhealDepletionTimer = 0;
+        }
+    }
+    
     this.weapon?.onTick(dt, this);
   }
 

@@ -31,11 +31,10 @@ export class HUD {
         <div class="ball-card-header">
           <span class="ball-dot" style="background:${ball.color}"></span>
           <span class="ball-name">${cfg.name}</span>
+          <span class="ball-stat hp-full" id="card-${ball.id}-hp" style="margin-left:auto;">HP: ${ball.maxHp}</span>
         </div>
         <div class="ball-divider"></div>
-        <span class="ball-weapon-name">${ball.weapon?.name ?? '—'}</span>
         <span class="ball-stat"        id="card-${ball.id}-dmg">DMG: 2</span>
-        <span class="ball-stat hp-full" id="card-${ball.id}-hp">HP: ${ball.maxHp}</span>
         <span class="ball-stat"        id="card-${ball.id}-dealt">Dealt: 0</span>
         <span class="ball-stat"        id="card-${ball.id}-extra"></span>
       </div>`;

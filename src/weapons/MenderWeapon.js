@@ -18,12 +18,16 @@ export class MenderWeapon extends Weapon {
   constructor(menderSystem) {
     super({ name: 'Mender', cooldown: 0.4, color: '#4CAF50', reach: 0, weaponWidth: 0 });
     this.isBodyWeapon   = true;
-    this.baseDamage     = 1;
-    this.menderSystem   = menderSystem;
-    this.baseCharges    = 3;    // permanent — grows with hits, never consumed
+    this.menderSystem = menderSystem;
+    this.baseCharges  = 3;    // permanent — grows with hits, never consumed
     this._activeCharges = 0;    // charges remaining in current active pulse
-    this._pulseTimer    = PULSE_COOLDOWN; // countdown before next pulse
-    this._pulsing       = false; // true while field is active
+    this._pulseTimer  = PULSE_COOLDOWN; // countdown before next pulse
+    this._pulsing     = false; // true while field is active
+    this.baseDamage   = 1;
+  }
+
+  get currentDamage() {
+      return this._pulsing ? 1 + Math.floor(this.baseCharges / 2) : 1;
   }
 
   get healCharges()    { return this._activeCharges; }
@@ -61,7 +65,7 @@ export class MenderWeapon extends Weapon {
 
   onCollide(owner, target) {
     if (!this.isReady || !target.alive || target.isImmune) return false;
-    target.takeDamage(1, owner);
+    target.takeDamage(this.currentDamage, owner);
     this.damageDealt++;
     this.hitsLanded++;
     this.baseCharges++;
@@ -71,4 +75,9 @@ export class MenderWeapon extends Weapon {
 
   render() {}
   getWorldSegment() { return null; }
+
+  resetScaling() {
+    super.resetScaling();
+    this.baseCharges = 3;
+  }
 }

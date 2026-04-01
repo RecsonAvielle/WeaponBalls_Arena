@@ -24,6 +24,7 @@ import { WaveSystem } from '../systems/WaveSystem.js';
 import { BlightAISystem } from '../systems/BlightAISystem.js';
 import { BossSystem } from '../systems/BossSystem.js';
 import { TargetingSystem } from '../systems/TargetingSystem.js';
+import { TurretSystem } from '../systems/TurretSystem.js';
 import { bus, EVENTS } from '../systems/EventBus.js';
 
 import { getBallConfigs } from '../data/BallConfigs.js';
@@ -32,6 +33,7 @@ import { ARENA_CONFIGS } from '../data/ArenaConfigs.js';
 import { BlightWeaponless } from '../weapons/BlightWeaponless.js';
 import { BlightMelee } from '../weapons/BlightMelee.js';
 import { BlightRanger } from '../weapons/BlightRanger.js';
+import { DummyWeapon } from '../weapons/DummyWeapon.js';
 
 export class GameManager {
   constructor(canvas, hudElement) {
@@ -56,6 +58,8 @@ export class GameManager {
     this.bossSys      = new BossSystem();
     this.targetingSys = new TargetingSystem();
 
+    this.turretSys    = new TurretSystem(this.projSys);
+
     this.obsSystem    = new ObstacleSystem([]);
     this.healBoxSys   = new HealBoxSystem([]);
 
@@ -69,6 +73,7 @@ export class GameManager {
       minionSys:    this.minionSys,
       menderSys:    this.menderSys,
       laserSys:     this.laserSys,
+      turretSys:    this.turretSys,
     });
 
     this.balls        = [];
@@ -76,6 +81,30 @@ export class GameManager {
     this.spikeBallRef = null;
     this.stopwatch    = 0;
     this.FREEZE_S     = 3.0;
+    
+    // Testing & Config Tracking
+    this.testToolsEnabled  = false;
+    this.scaleResetEnabled = false;
+    this.mouseProps        = { x: -1000, y: -1000, leftDown: false, rightDown: false };
+    this._leftClickAoETimer = 0;
+    this.testDummy         = null;
+
+    canvas.addEventListener('mousemove', e => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      this.mouseProps.x = (e.clientX - rect.left) * scaleX;
+      this.mouseProps.y = (e.clientY - rect.top) * scaleY;
+    });
+    canvas.addEventListener('mousedown', e => { 
+        if (e.button === 0) { this.mouseProps.leftDown = true; this._leftClickAoETimer = 0.2; }
+        if (e.button === 2) { this.mouseProps.rightDown = true; } 
+    });
+    window.addEventListener('mouseup', e => { 
+        if (e.button === 0) { this.mouseProps.leftDown = false; }
+        if (e.button === 2) { this.mouseProps.rightDown = false; } 
+    });
+    canvas.addEventListener('contextmenu', e => e.preventDefault());
 
     this._setupEvents();
   }
@@ -84,7 +113,15 @@ export class GameManager {
     bus.on(EVENTS.BALL_DAMAGED, ({ ball, amount }) => { this.hud.refresh(ball); this.audio.playHit(amount); });
     bus.on('sfx:parry', () => this.audio.playParry());
     bus.on(EVENTS.BALL_HEALED,  ({ ball }) => this.hud.refresh(ball));
-    bus.on(EVENTS.BALL_DIED,    ({ ball }) => { this.hud.refresh(ball); this.effects.spawnPop(ball); });
+    bus.on(EVENTS.BALL_DIED,    ({ ball }) => { 
+        this.hud.refresh(ball); 
+        this.effects.spawnPop(ball); 
+        if (this.scaleResetEnabled) {
+            for (const b of this.balls) {
+                if (b.alive && b.weapon) b.weapon.resetScaling?.();
+            }
+        }
+    });
   }
 
   reset() {
@@ -92,7 +129,9 @@ export class GameManager {
     this.stopwatch = 0;
   }
 
-  spawnBalls(ballSelections, arenaConfig, healBoxes = true) {
+  spawnBalls(ballSelections, arenaConfig, healBoxes = true, testTools = false, scaleReset = false) {
+    this.testToolsEnabled = testTools;
+    this.scaleResetEnabled = scaleReset;
     this.effects.clear();
     this.spikes.clear();
     this.projSys.clear();
@@ -104,6 +143,7 @@ export class GameManager {
     this.laserSys.setArena(arenaConfig.arena);
     this.minionSys.clear();
     this.menderSys.clear();
+    this.turretSys.clear();
     this.waveSys.reset();
     
     this.stopwatch = 0;
@@ -297,19 +337,91 @@ export class GameManager {
     
     this.minionSys.update(dt, alive, this.currentArena.arena, this.obsSystem, this.spikes);
     this.menderSys.update(dt, alive);
+    this.turretSys.update(dt, alive);
+
+    if (this.testToolsEnabled) {
+        if (this.mouseProps.leftDown) {
+            this._leftClickAoETimer += dt;
+            if (this._leftClickAoETimer >= 0.2) {
+                this._leftClickAoETimer = 0;
+                for (const ball of alive) {
+                    const dx = ball.position.x - this.mouseProps.x;
+                    const dy = ball.position.y - this.mouseProps.y;
+                    if (dx*dx+dy*dy <= 100 * 100) ball.takeDamage(1, null, false);
+                }
+            }
+        } else {
+            this._leftClickAoETimer = 0;
+        }
+
+        if (this.mouseProps.rightDown) {
+            if (!this.testDummy) {
+                this.testDummy = new Ball({
+                    id: 'test-dummy', color: '#888', team: 0, spinSpeed: 0, gravityScale: 0, 
+                    position: new Vector2(this.mouseProps.x, this.mouseProps.y), velocity: new Vector2(0,0), 
+                    spawnImmunity: 0, frozenTimer: 0, maxHp: 999999, maxSpeed: 0
+                });
+                this.testDummy.weapon = new DummyWeapon();
+                this.testDummy.weapon.owner = this.testDummy;
+                this.balls.push(this.testDummy);
+            }
+            this.testDummy.position = new Vector2(this.mouseProps.x, this.mouseProps.y);
+            this.testDummy.velocity = new Vector2(0,0);
+            this.testDummy.hp = this.testDummy.maxHp;
+            if (!alive.includes(this.testDummy)) alive.push(this.testDummy);
+        } else {
+            if (this.testDummy) {
+                this.balls = this.balls.filter(b => b.id !== 'test-dummy');
+                this.testDummy = null;
+            }
+        }
+    } else if (this.testDummy) {
+        this.balls = this.balls.filter(b => b.id !== 'test-dummy');
+        this.testDummy = null;
+    }
   }
 
   render(alpha) {
     if (!this.balls.length) return;
+    
     this.renderer.render(
       this.balls, this.effects.pops, this.spikes.spikes,
       this.projSys.projectiles, this.obsSystem.obstacles, this.trails,
-      this.healBoxSys.boxes, this.shockSys.rings, this.bhSys, this.minionSys.minions, this.frostAreaSys.areas, this.laserSys.beams, 
+      this.healBoxSys.boxes, this.shockSys.rings, this.bhSys, this.minionSys.minions, this.frostAreaSys.areas, this.laserSys.beams, this.turretSys.turrets, 
       alpha, this.currentArena.arena, this.currentArena.isWaveArena ? this.currentArena : null,
     );
     
     const maxFreeze = Math.max(...this.balls.map(b => b.frozenTimer));
     if (maxFreeze > 0) this.renderer.drawCountdown(maxFreeze);
+
+    // Testing Tools: AoE circle drawn on top of everything
+    if (this.testToolsEnabled) {
+      const arena = this.currentArena.arena;
+      const mx = this.mouseProps.x;
+      const my = this.mouseProps.y;
+      const insideArena = mx >= arena.x && mx <= arena.x + arena.width &&
+                          my >= arena.y && my <= arena.y + arena.height;
+
+      if (insideArena) {
+        const ctx = this.renderer.ctx;
+        const holding = this.mouseProps.leftDown;
+        ctx.save();
+        if (holding) {
+          ctx.fillStyle = 'rgba(255, 60, 60, 0.15)';
+          ctx.beginPath();
+          ctx.arc(mx, my, 100, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.strokeStyle = holding ? 'rgba(255, 60, 60, 0.9)' : 'rgba(255, 60, 60, 0.35)';
+        ctx.lineWidth   = holding ? 2 : 1;
+        ctx.setLineDash(holding ? [] : [6, 5]);
+        ctx.beginPath();
+        ctx.arc(mx, my, 100, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+      }
+    }
 
     if (this.stopwatch > 0) {
       const m = Math.floor(this.stopwatch / 60);

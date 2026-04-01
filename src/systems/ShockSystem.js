@@ -65,13 +65,15 @@ export class ShockSystem {
     }
 
     // Main shock: grow radius and check damage tier
-    if (shock.ownerWeapon && shock.isMain) {
-      shock.ownerWeapon._radiusGrowth  = (shock.ownerWeapon._radiusGrowth  ?? 0) + 1.5;
-      shock.ownerWeapon.mainAoeRadius += 1.5;
-      const newTier = Math.floor(shock.ownerWeapon._radiusGrowth / 2);
-      if (newTier > (shock.ownerWeapon._damageTier ?? 0)) {
-        shock.ownerWeapon._damageTier  = newTier;
-        shock.ownerWeapon._bonusDamage = (shock.ownerWeapon._bonusDamage ?? 0) + 1;
+    if (shock.ownerWeapon && shock.isMain && hitCount > 0) {
+      shock.ownerWeapon._radiusGrowth  = (shock.ownerWeapon._radiusGrowth  ?? 0) + 1.0;
+      shock.ownerWeapon.mainAoeRadius += 1.0;
+      
+      shock.ownerWeapon._hitCounter = (shock.ownerWeapon._hitCounter ?? 0) + 1;
+      if (shock.ownerWeapon._hitCounter >= 2) {
+          shock.ownerWeapon._hitCounter = 0;
+          shock.ownerWeapon._damageTier  = (shock.ownerWeapon._damageTier ?? 0) + 1;
+          shock.ownerWeapon._bonusDamage = (shock.ownerWeapon._bonusDamage ?? 0) + 1;
       }
     }
 
@@ -83,8 +85,8 @@ export class ShockSystem {
       this.spawn({
         x           : target.position.x,
         y           : target.position.y,
-        radius      : (w?.chainAoeRadius ?? 80) * (w?.scale ?? 1),
-        damage      : shock.damage,
+        radius      : 100, // Explicit 100 no-scaling
+        damage      : 2,   // Explicit 2 dmg no-scaling
         color       : shock.color,
         ownerId     : shock.ownerId,
         ownerTeam   : shock.ownerTeam,

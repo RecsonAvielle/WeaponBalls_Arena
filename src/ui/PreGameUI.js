@@ -33,7 +33,9 @@ export class PreGameUI {
     this._counts       = {};
     this._instanceTeams = {};
     this._bossBall      = null;
-    this._healBoxes     = true; // toggle heal box spawning
+    this._healBoxes     = true;
+    this._testTools     = false;
+    this._scaleReset    = false;
     ballDefs.forEach(b => {
       this._counts[b.id]        = 0;
       this._instanceTeams[b.id] = [];
@@ -143,6 +145,12 @@ export class PreGameUI {
             <button class="pg-toggle-btn ${this._healBoxes ? 'active' : ''}" id="pg-healbox-toggle">
               Heal Boxes: ${this._healBoxes ? 'ON' : 'OFF'}
             </button>
+            <button class="pg-toggle-btn ${this._testTools ? 'active' : ''}" id="pg-testbox-toggle" style="margin-top:8px;">
+              Testing Tools: ${this._testTools ? 'ON' : 'OFF'}
+            </button>
+            <button class="pg-toggle-btn ${this._scaleReset ? 'active' : ''}" id="pg-resetbox-toggle" style="margin-top:8px;">
+              Scale Resets: ${this._scaleReset ? 'ON' : 'OFF'}
+            </button>
           </div>
         </div>
       </div>`;
@@ -202,6 +210,14 @@ export class PreGameUI {
       this._healBoxes = !this._healBoxes;
       this._render();
     });
+    this.overlay.querySelector('#pg-testbox-toggle')?.addEventListener('click', () => {
+      this._testTools = !this._testTools;
+      this._render();
+    });
+    this.overlay.querySelector('#pg-resetbox-toggle')?.addEventListener('click', () => {
+      this._scaleReset = !this._scaleReset;
+      this._render();
+    });
 
     // Boss designation
     this.overlay.querySelectorAll('[data-boss-ball]').forEach(btn => {
@@ -229,7 +245,7 @@ export class PreGameUI {
         }
       }
       this.hide();
-      this.onStart({ ballSelections, arenaConfig: this.arenaDefs[this._selectedArena], healBoxes: this._healBoxes });
+      this.onStart({ ballSelections, arenaConfig: this.arenaDefs[this._selectedArena], healBoxes: this._healBoxes, testTools: this._testTools, scaleReset: this._scaleReset });
     });
   }
 }

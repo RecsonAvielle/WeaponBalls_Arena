@@ -4,7 +4,7 @@ body {
   background: #FDFAF5;
   overflow-x: hidden;
   color: #2C2C2C;
-  font-family: 'Courier New', monospace;
+  font-family: 'Outfit', sans-serif;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
@@ -16,8 +16,10 @@ body {
 }
 
 h1 {
-  font-size: 12px;
-  letter-spacing: 0.25em;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   color: #9C9080;
 }
@@ -80,7 +82,7 @@ button:hover { background: #E4DDD0; }
 /* Normal mode: 4-per-row fixed grid, left-aligned */
 .ball-details-grid {
   display: grid;
-  grid-template-columns: repeat(4, 130px);
+  grid-template-columns: repeat(4, 160px);
   gap: 8px;
   justify-content: center;
 }
@@ -95,7 +97,7 @@ button:hover { background: #E4DDD0; }
 
 .boss-side {
   display: grid;
-  grid-template-columns: repeat(2, 130px);
+  grid-template-columns: repeat(2, 160px);
   gap: 8px;
   align-content: start;
 }
@@ -108,7 +110,7 @@ button:hover { background: #E4DDD0; }
 }
 
 .boss-center .ball-card {
-  width: 170px;
+  width: 190px;
   padding: 10px 14px;
 }
 
@@ -121,7 +123,7 @@ button:hover { background: #E4DDD0; }
   background: #F0EAE0;
   border: 1.5px solid #D4C9B0;
   border-radius: 6px;
-  width: 130px;
+  width: 160px;
   box-sizing: border-box;
   transition: opacity 0.3s;
 }
@@ -151,10 +153,11 @@ button:hover { background: #E4DDD0; }
 }
 
 .ball-name {
-  font-size: 12px;
-  font-weight: bold;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px;
+  font-weight: 700;
   color: #2C2C2C;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
 }
 
 .ball-divider {
@@ -551,7 +554,7 @@ button:hover { background: #E4DDD0; }
 
 #zoom-label {
   font-size: 10px;
-  font-family: monospace;
+  font-family: inherit;
   color: #5C5040;
   min-width: 32px;
   text-align: center;
@@ -560,10 +563,10 @@ button:hover { background: #E4DDD0; }
 
 
 
-/* Boss button — monospace to match rest of UI */
+/* Boss button — matches rest of UI */
 .pg-boss-btn {
-  font-family: monospace;
+  font-family: 'Outfit', sans-serif;
   font-weight: bold;
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 0;
 }

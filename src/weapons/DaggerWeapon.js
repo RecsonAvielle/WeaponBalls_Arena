@@ -34,6 +34,18 @@ export class DaggerWeapon extends Weapon {
     return true;
   }
 
+  onParry(owner, target) {
+      const bonus = (owner.spinSpeed - owner.baseSpinSpeed) / owner.baseSpinSpeed;
+      if (bonus >= 3.0) {
+          const parryDamage = Math.floor(bonus - 2);
+          target.takeDamage(parryDamage, owner, false);
+          
+          this.damageDealt += parryDamage;
+          // Note: Hitting via parry DOES trigger scaling
+          this.hitsLanded += 1;
+      }
+  }
+
   render(ctx, x, y, radius, spinAngle) {
     renderRect(ctx, x, y, radius, spinAngle, this.scaledReach, this.scaledWeaponWidth,
       this.isReady ? this.color : '#ffffff');

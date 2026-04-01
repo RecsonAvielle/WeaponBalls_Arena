@@ -64,4 +64,13 @@ export class ShockWeapon extends Weapon {
 
   render() {}
   getWorldSegment() { return null; }
+
+  resetScaling() {
+    super.resetScaling();
+    this._radiusGrowth = 0;
+    this.mainAoeRadius = SHOCK_RADIUS;
+    this._damageTier = 0;
+    this._bonusDamage = 0;
+    this._hitCounter = 0;
+  }
 }
