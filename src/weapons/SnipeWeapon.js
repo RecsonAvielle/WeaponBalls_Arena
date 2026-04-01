@@ -30,12 +30,14 @@ export class SnipeWeapon extends Weapon {
     this._aimAngle       = 0;
     this._fireTimer      = FIRE_INTERVAL;
     this._parryCooldown  = 0;
+    this._speedBonus     = 0;
     this.targetBalls     = [];
     this.requiresTargeting = true;
   }
 
   onProjectileHit() {
-    this.baseDamage += 1;
+    this.baseDamage += 2;
+    this._speedBonus += 10;
     this.hitsLanded++;
   }
 
@@ -75,12 +77,16 @@ export class SnipeWeapon extends Weapon {
 
   _fire(owner) {
     const s = this.scale ?? 1;
+    const isCrit = Math.random() < 0.20;
+    const dmg = isCrit ? this.baseDamage * 1.5 : this.baseDamage;
+    const spd = PROJ_SPEED + this._speedBonus;
+
     this.projSystem.add(new Projectile({
       x          : owner.position.x,
       y          : owner.position.y,
       angle      : this._aimAngle,
-      speed      : PROJ_SPEED,
-      damage     : this.baseDamage,
+      speed      : spd,
+      damage     : dmg,
       ownerId    : owner.id,
       ownerTeam  : owner.team ?? 0,
       color      : owner.color,
@@ -92,7 +98,9 @@ export class SnipeWeapon extends Weapon {
 
   onParry(owner) {
     this._parryCooldown = PARRY_COOLDOWN;
-    this._fireTimer     = FIRE_INTERVAL + 1.0; // reset + 2s penalty
+    this._speedBonus += 5;
+    this._fire(owner); // Immediately shoot upon parry
+    this._fireTimer     = FIRE_INTERVAL + 1.0; // reset + penalty
   }
 
   getWorldSegment(ball) {
@@ -126,5 +134,11 @@ export class SnipeWeapon extends Weapon {
     ctx.lineTo(rX + rW - 4, -rH / 2 + 3);
     ctx.stroke();
     ctx.restore();
+  }
+
+  resetScaling() {
+    super.resetScaling();
+    this.baseDamage = 2;
+    this._speedBonus = 0;
   }
 }

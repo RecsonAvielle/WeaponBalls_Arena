@@ -15,7 +15,7 @@ import { Vector2 } from '../core/Vector2.js';
 const BASE_MINI_RADIUS = 10;
 const MINI_SPEED      = 420;   // max chase speed
 const MINI_ACCEL      = 600;   // px/s² toward target
-const SELF_KNOCKBACK  = 600;   // px/s away from target after hitting
+const SELF_KNOCKBACK  = 200;   // px/s away from target after hitting
 const DMGCOOL_FRAMES  = 30;    // frames between hits per mini-ball pair
 
 export class MinionSystem {
@@ -148,13 +148,13 @@ export class MinionSystem {
         if (this._dmgCooldowns.has(key)) continue;
 
         // Deal damage to ball — no velocity burst (silent) but apply small push
-        ball.takeDamage(1, null, true);
+        ball.takeDamage(2, null, true);
         // Small push to ball
         const away = ball.position.sub(mini.position).normalized;
         ball.velocity = ball.velocity.add(away.scale(110 * (ball.knockbackResist ?? 1)));
 
         if (mini.ownerWeapon) {
-          mini.ownerWeapon.damageDealt += 1;
+          mini.ownerWeapon.damageDealt += 2;
           mini.ownerWeapon._onMiniHit?.();
         }
 

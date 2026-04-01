@@ -104,4 +104,10 @@ export class Weapon {
     ctx.stroke();
     ctx.restore();
   }
+
+  resetScaling() {
+    this.hitsLanded = 0;
+    this.damageDealt = 0;
+    this._targetCooldowns.clear();
+  }
 }

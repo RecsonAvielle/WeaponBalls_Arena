@@ -11,9 +11,9 @@ import { Weapon }  from './Weapon.js';
 import { Vector2 } from '../core/Vector2.js';
 
 const AIM_SMOOTHING  = 6.0;
-const FIRE_INTERVAL  = 1.2;
+const FIRE_INTERVAL  = 2.0;
 const CHANNEL_TIME   = 0.25;
-const PARRY_COOLDOWN = 4.0;
+const PARRY_COOLDOWN = 6.0;
 
 export class LaserWeapon extends Weapon {
   constructor(laserSystem) {
@@ -21,7 +21,8 @@ export class LaserWeapon extends Weapon {
     this.laserSystem    = laserSystem;
     this.baseDamage     = 2;
     this._aimAngle      = 0;
-    this._fireTimer     = FIRE_INTERVAL;
+    this._currentInterval = 2.0;
+    this._fireTimer     = this._currentInterval;
     this._channeling    = false;
     this._channelTimer  = 0;
     this._parryCooldown = 0;
@@ -61,7 +62,7 @@ export class LaserWeapon extends Weapon {
       this._channelTimer -= dt;
       if (this._channelTimer <= 0) {
         this._channeling = false;
-        this._fireTimer  = FIRE_INTERVAL;
+        this._fireTimer  = this._currentInterval;
         this.laserSystem.fire({
           owner,
           angle      : this._aimAngle,
@@ -79,7 +80,19 @@ export class LaserWeapon extends Weapon {
     }
   }
 
-  onParry(owner) { this._parryCooldown = PARRY_COOLDOWN; }
+  onProjectileHit() {
+      // Beam pierced at least one enemy
+      this._currentInterval = Math.max(1.0, this._currentInterval - 0.1);
+  }
+
+  onDamaged() {
+      this._currentInterval = 2.0; // Reset upon taking damage
+  }
+
+  onParry(owner) {
+      this._parryCooldown = PARRY_COOLDOWN; 
+      this._fireTimer = this._currentInterval + 1.0; 
+  }
 
   getWorldSegment(ball) {
     if (this._parryCooldown > 0) return null;
@@ -130,5 +143,11 @@ export class LaserWeapon extends Weapon {
     ctx.lineTo(rX + rW - 4, -rH / 2 + 3);
     ctx.stroke();
     ctx.restore();
+  }
+
+  resetScaling() {
+    super.resetScaling();
+    this._currentInterval = 2.0;
+    this._fireTimer = this._currentInterval;
   }
 }

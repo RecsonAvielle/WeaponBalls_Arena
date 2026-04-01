@@ -2,19 +2,8 @@ import { GRAVITY } from '../core/Physics.js';
 
 export const ARENA_CONFIGS = [
   {
-    id          : 'standard',
-    name        : 'Standard',
-    description : '480×480 · gravity',
-    canvasSize  : 520,
-    arena       : { x: 20, y: 20, width: 480, height: 480 },
-    gravity     : GRAVITY,
-    maxBalls    : 8,
-    obstacles   : [],
-    healBoxes   : [{ x: 260, y: 260 }],
-  },
-  {
     id          : 'small',
-    name        : 'Small',
+    name        : 'Small Arena',
     description : '320×320 · gravity',
     canvasSize  : 360,
     arena       : { x: 20, y: 20, width: 320, height: 320 },
@@ -24,8 +13,19 @@ export const ARENA_CONFIGS = [
     healBoxes   : [{ x: 180, y: 180 }],
   },
   {
+    id          : 'standard',
+    name        : 'Standard Arena',
+    description : '480×480 · gravity',
+    canvasSize  : 520,
+    arena       : { x: 20, y: 20, width: 480, height: 480 },
+    gravity     : GRAVITY,
+    maxBalls    : 8,
+    obstacles   : [],
+    healBoxes   : [{ x: 260, y: 260 }],
+  },
+  {
     id          : 'large-zerog',
-    name        : 'Zero-G',
+    name        : 'Large Arena',
     description : '760×760 · no gravity',
     canvasSize  : 800,
     arena       : { x: 20, y: 20, width: 760, height: 760 },
@@ -41,7 +41,7 @@ export const ARENA_CONFIGS = [
   },
   {
     id          : 'large-wall',
-    name        : 'Center Wall',
+    name        : 'Donut Arena',
     description : '760×760 · no gravity · center wall',
     canvasSize  : 800,
     arena       : { x: 20, y: 20, width: 760, height: 760 },
@@ -57,14 +57,13 @@ export const ARENA_CONFIGS = [
   },
   {
     id          : 'boss',
-    name        : 'Boss Battle',
+    name        : 'Boss Arena',
     description : '1060×1060 · no gravity · team heals',
     canvasSize  : 1100,
     arena       : { x: 20, y: 20, width: 1060, height: 1060 },
     gravity     : 0,
-    maxBalls    : 9,  // 1 boss + up to 8 challengers
+    maxBalls    : 9, 
     obstacles   : [],
-    // Team heal boxes at corners — team 1 = challengers only
     healBoxes   : [
       { x: 100, y: 100, team: 1, amount: 50 },
       { x: 1000, y: 100, team: 1, amount: 50 },
@@ -79,17 +78,13 @@ export const ARENA_CONFIGS = [
     description : '760×760 · waves of blight',
     canvasSize  : 800,
     canvasHeight: 980,
-    // Full physics arena including staging zone on top
     arena       : { x: 20, y: 20, width: 760, height: 940 },
-    // Battle zone — where challengers live
     battleArena : { x: 20, y: 200, width: 760, height: 760 },
-    // Staging zone — blight spawn here, invisible to player
     stagingZone : { x: 20, y: 20,  width: 760, height: 180 },
     divisionY   : 200,
     gravity     : 260,
     maxBalls    : 4,
     obstacles   : [],
-    // Heal boxes at center-left and center-right of battle area
     healBoxes   : [
       { x: 80,  y: 580, team: 1, amount: 50 },
       { x: 740, y: 580, team: 1, amount: 50 },
